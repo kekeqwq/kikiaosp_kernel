@@ -2,14 +2,18 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1789286504,
-        "narHash": "sha256-eiEK7cKZORNEvX0GeF3RtNEF/JXhgf2RqSp3230q13E=",
-        "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/refs/heads/nixos-unstable.tar.gz"
+        "lastModified": 1788160686,
+        "narHash": "sha256-KtMzegh9qItdefS12YbDRCizLjYSkCPXIDZMail05as=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "597647d3b728353852b73cd8d75bbd8a7cb4ff67",
+        "type": "github"
       },
       "original": {
-        "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/refs/heads/nixos-unstable.tar.gz"
+        "owner": "NixOS",
+        "ref": "nixos-unstable-small",
+        "repo": "nixpkgs",
+        "type": "github"
       }
     },
     "root": {
