@@ -34,6 +34,24 @@
         ANDROID_BINDER_IPC = yes; ANDROID_BINDERFS = yes;
         ANDROID_BINDER_DEVICES = "\"binder,hwbinder,vndbinder\"";
         ASHMEM = no; MEMFD_CREATE = yes;
+        # Android 17 netd still uses iptables-legacy. Linux 7.3 split its
+        # legacy IPv4/IPv6 evaluators from the old IP*_NF_IPTABLES symbols.
+        # Build the tables in so netd can initialize before module loading.
+        NETFILTER_XTABLES_LEGACY = yes;
+        IP_NF_IPTABLES_LEGACY = yes;
+        IP6_NF_IPTABLES_LEGACY = yes;
+        NF_NAT = yes;
+        IP_NF_FILTER = yes;
+        IP_NF_MANGLE = yes;
+        IP_NF_RAW = yes;
+        IP_NF_NAT = yes;
+        IP_NF_TARGET_REJECT = yes;
+        IP_NF_TARGET_MASQUERADE = yes;
+        IP_NF_TARGET_REDIRECT = yes;
+        IP6_NF_FILTER = yes;
+        IP6_NF_MANGLE = yes;
+        IP6_NF_RAW = yes;
+        IP6_NF_TARGET_REJECT = yes;
         EROFS_FS = yes; EROFS_FS_ZIP = yes; EROFS_FS_ZIP_LZMA = yes;
         F2FS_FS = yes; EXT4_FS = yes; OVERLAY_FS = yes; SQUASHFS = yes;
         DRM = yes; DRM_VIRTIO_GPU = yes; DRM_FBDEV_EMULATION = yes;
