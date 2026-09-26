@@ -1,0 +1,3 @@
+# Nix output links are local build products, never source.
+/result
+/result-*
