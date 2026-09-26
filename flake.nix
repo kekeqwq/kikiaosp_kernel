@@ -20,6 +20,9 @@
         VIRTIO = yes; VIRTIO_PCI = yes; VIRTIO_BLK = yes; VIRTIO_NET = yes;
         VIRTIO_BALLOON = yes; VIRTIO_INPUT = yes; VIRTIO_MMIO = yes;
         VIRTIO_CONSOLE = yes; HW_RANDOM_VIRTIO = yes; VIRTIO_VSOCKETS = yes;
+        # QEMU virtio-sound exposes the single playback PCM used by the
+        # upstream AIDL primary audio HAL (ALSA card 0, device 0).
+        SND = yes; SND_PCM = yes; SND_VIRTIO = yes;
         HYPERV_VSOCKETS = yes;
         DEVTMPFS = yes; DEVTMPFS_MOUNT = yes; TMPFS = yes; TMPFS_POSIX_ACL = yes; TMPFS_XATTR = yes;
         MD = yes; BLK_DEV_DM = yes; DM_VERITY = yes; DM_VERITY_AVB = yes; DM_BOW = yes; DM_USER = yes;
