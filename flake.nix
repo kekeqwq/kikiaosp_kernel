@@ -23,6 +23,10 @@
         # QEMU virtio-sound exposes the single playback PCM used by the
         # upstream AIDL primary audio HAL (ALSA card 0, device 0).
         SND = yes; SND_PCM = yes; SND_VIRTIO = yes;
+        # Codec2 software decoders allocate from the dma-buf system heap.
+        # Without /dev/dma_heap/system, UI clicks and ringtone preview fail
+        # with NO_MEMORY even though PCM playback works.
+        DMA_SHARED_BUFFER = yes; DMABUF_HEAPS = yes; DMABUF_HEAPS_SYSTEM = yes;
         HYPERV_VSOCKETS = yes;
         DEVTMPFS = yes; DEVTMPFS_MOUNT = yes; TMPFS = yes; TMPFS_POSIX_ACL = yes; TMPFS_XATTR = yes;
         MD = yes; BLK_DEV_DM = yes; DM_VERITY = yes; DM_VERITY_AVB = yes; DM_BOW = yes; DM_USER = yes;
