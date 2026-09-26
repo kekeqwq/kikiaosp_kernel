@@ -86,7 +86,12 @@
         };
         inherit configfile;
         allowImportFromDerivation = true;
-        kernelPatches = [ ];
+        kernelPatches = [
+          {
+            name = "virtio-gpu-wait-for-edid-before-hotplug";
+            patch = ./patches/virtio-gpu-wait-for-edid-before-hotplug.patch;
+          }
+        ];
       };
 
       # Preserve the artifact layout consumed by the existing KikiAOSP/QEMU

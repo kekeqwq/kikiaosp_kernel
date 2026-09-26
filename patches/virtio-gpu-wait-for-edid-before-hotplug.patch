@@ -1,0 +1,84 @@
+From: KikiAOSP <kikiaosp@local>
+Subject: [PATCH] drm/virtio: wait for EDID responses before hotplug
+
+The display-change worker queues GET_EDID and GET_DISPLAY_INFO requests but
+only waits for the display-info response.  A fast display-info response can
+therefore make the DRM hotplug helper probe the connector while it still has
+the previous EDID.  The new EDID arrives later without another hotplug event,
+leaving userspace with stale modes until the connector is manually reprobed.
+
+Track outstanding EDID requests and wait for both response types before
+notifying DRM userspace.
+---
+ drivers/gpu/drm/virtio/virtgpu_drv.h |  1 +
+ drivers/gpu/drm/virtio/virtgpu_kms.c | 10 +++++++---
+ drivers/gpu/drm/virtio/virtgpu_vq.c  |  3 +++
+ 3 files changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpu/drm/virtio/virtgpu_drv.h b/drivers/gpu/drm/virtio/virtgpu_drv.h
+--- a/drivers/gpu/drm/virtio/virtgpu_drv.h
++++ b/drivers/gpu/drm/virtio/virtgpu_drv.h
+@@ -271,6 +271,7 @@ struct virtio_gpu_device {
+ 	/* current display info */
+ 	spinlock_t display_info_lock;
+ 	bool display_info_pending;
++	atomic_t pending_edid_commands;
+ 
+ 	struct virtio_gpu_fence_driver fence_drv;
+ 
+diff --git a/drivers/gpu/drm/virtio/virtgpu_kms.c b/drivers/gpu/drm/virtio/virtgpu_kms.c
+--- a/drivers/gpu/drm/virtio/virtgpu_kms.c
++++ b/drivers/gpu/drm/virtio/virtgpu_kms.c
+@@ -50,8 +50,10 @@ static void virtio_gpu_config_changed_work_func(struct work_struct *work)
+ 				virtio_gpu_cmd_get_edids(vgdev);
+ 			virtio_gpu_cmd_get_display_info(vgdev);
+ 			virtio_gpu_notify(vgdev);
+-			wait_event_timeout(vgdev->resp_wq,
+-					   !vgdev->display_info_pending,
++			wait_event_timeout(vgdev->resp_wq,
++					   !vgdev->display_info_pending &&
++					   (!vgdev->has_edid ||
++					    !atomic_read(&vgdev->pending_edid_commands)),
+ 					   5 * HZ);
+ 			drm_kms_helper_hotplug_event(vgdev->ddev);
+ 		}
+@@ -306,7 +308,9 @@ int virtio_gpu_init(struct virtio_device *vdev, struct drm_device *dev)
+ 		virtio_gpu_cmd_get_display_info(vgdev);
+ 		virtio_gpu_notify(vgdev);
+ 		if (!wait_event_timeout(vgdev->resp_wq,
+-					!vgdev->display_info_pending,
++					!vgdev->display_info_pending &&
++					(!vgdev->has_edid ||
++					 !atomic_read(&vgdev->pending_edid_commands)),
+ 					5 * HZ)) {
+ 			DRM_ERROR("timed out waiting for display info\n");
+ 			ret = -ETIMEDOUT;
+diff --git a/drivers/gpu/drm/virtio/virtgpu_vq.c b/drivers/gpu/drm/virtio/virtgpu_vq.c
+--- a/drivers/gpu/drm/virtio/virtgpu_vq.c
++++ b/drivers/gpu/drm/virtio/virtgpu_vq.c
+@@ -981,6 +981,7 @@ static void virtio_gpu_cmd_get_edid_cb(struct virtio_gpu_device *vgdev,
+ 	spin_unlock(&vgdev->display_info_lock);
+ 
+ 	drm_edid_free(old_edid);
++	atomic_dec_if_positive(&vgdev->pending_edid_commands);
+ 	wake_up(&vgdev->resp_wq);
+ }
+ 
+@@ -1110,6 +1111,7 @@ int virtio_gpu_cmd_get_edids(struct virtio_gpu_device *vgdev)
+ 	if (WARN_ON(!vgdev->has_edid))
+ 		return -EINVAL;
+ 
++	atomic_set(&vgdev->pending_edid_commands, 0);
+ 	for (scanout = 0; scanout < vgdev->num_scanouts; scanout++) {
+ 		resp_buf = kzalloc_obj(struct virtio_gpu_resp_edid);
+ 		if (!resp_buf)
+@@ -1124,6 +1126,7 @@ int virtio_gpu_cmd_get_edids(struct virtio_gpu_device *vgdev)
+ 			 resp_buf);
+ 		cmd_p->hdr.type = cpu_to_le32(VIRTIO_GPU_CMD_GET_EDID);
+ 		cmd_p->scanout = cpu_to_le32(scanout);
++		atomic_inc(&vgdev->pending_edid_commands);
+ 		virtio_gpu_queue_ctrl_buffer(vgdev, vbuf);
+ 	}
+ 
+-- 
+2.51.0
