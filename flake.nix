@@ -98,6 +98,10 @@
             name = "virtio-gpu-wait-for-edid-before-hotplug";
             patch = ./patches/virtio-gpu-wait-for-edid-before-hotplug.patch;
           }
+          {
+            name = "drm-crtc-fence-signaled-ops-race";
+            patch = ./patches/drm-crtc-fence-signaled-ops-race.patch;
+          }
         ];
       };
 

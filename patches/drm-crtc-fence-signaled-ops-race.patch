@@ -1,0 +1,25 @@
+From: KikiAOSP <kikiaosp@local>
+Subject: [PATCH] drm: avoid checking detached fence ops from CRTC callbacks
+
+dma_fence_timeline_name() selects the callback while holding RCU. Signaling
+can then clear fence->ops for fences with no release or wait operation. The
+CRTC callback's second read of fence->ops can see NULL and hit BUG_ON even
+though the callback was correctly selected. Both callers of fence_to_crtc()
+are private members of drm_crtc_fence_ops, so the repeated check is redundant.
+
+Keep the callback's existing CRTC lookup and let the dma-fence RCU lifetime
+rules protect the driver data until the callback returns.
+---
+ drivers/gpu/drm/drm_crtc.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/drm_crtc.c b/drivers/gpu/drm/drm_crtc.c
+--- a/drivers/gpu/drm/drm_crtc.c
++++ b/drivers/gpu/drm/drm_crtc.c
+@@ -157,7 +157,6 @@ static const struct dma_fence_ops drm_crtc_fence_ops;
+ 
+ static struct drm_crtc *fence_to_crtc(struct dma_fence *fence)
+ {
+-	BUG_ON(rcu_access_pointer(fence->ops) != &drm_crtc_fence_ops);
+ 	return container_of(fence->extern_lock, struct drm_crtc, fence_lock);
+ }

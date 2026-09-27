@@ -2,7 +2,7 @@
 
 此仓库只负责生成 KikiAOSP 测试设备的 AArch64 Linux 内核，不包含 Android 系统镜像、QEMU 补丁或 Windows 启动逻辑。Android 设备树与系统构建见 [kikiaosp_test](https://github.com/kekeqwq/kikiaosp_test)，取得镜像、打包与启动见 [KikiEmu](https://github.com/kekeqwq/KikiEmu)。
 
-当前功能基线为 Linux 7.3-rc4、4 KiB 页、`CONFIG_LOCALVERSION=-4k`，包含 QEMU `virt` 所需 VirtIO/DRM/Binder/F2FS 和 Android 17 `netd` 使用的 legacy iptables 内建选项。`kernelPatches` 还会应用 `virtio-gpu-wait-for-edid-before-hotplug.patch`：显示尺寸变化时同时等待 EDID 与 display-info 响应，再通知 DRM 用户空间，避免 HWC 在旧 EDID 上完成热插拔探测。源码修订、哈希、内核配置和补丁都由 `flake.nix` 与 `flake.lock` 固定。
+当前功能基线为 Linux 7.3-rc4、4 KiB 页、`CONFIG_LOCALVERSION=-4k`，包含 QEMU `virt` 所需 VirtIO/DRM/Binder/F2FS 和 Android 17 `netd` 使用的 legacy iptables 内建选项。`kernelPatches` 会应用 `virtio-gpu-wait-for-edid-before-hotplug.patch`：显示尺寸变化时同时等待 EDID 与 display-info 响应，再通知 DRM 用户空间，避免 HWC 在旧 EDID 上完成热插拔探测。GPU 分支另加 `drm-crtc-fence-signaled-ops-race.patch`，修正 fence 完成时 `fence->ops` 被清空而 CRTC 命名回调重复检查它所致的 panic；该修正仍需长时实测。源码修订、哈希、内核配置和补丁都由 `flake.nix` 与 `flake.lock` 固定。
 
 在 x86_64 Linux 构建机上安装 Nix 并启用 flakes 后运行：
 
