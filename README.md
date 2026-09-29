@@ -32,3 +32,9 @@ sha256sum result/boot/kernel
 ```
 
 185 上当前主线产物为 35,613,184 字节，SHA-256 `f33ef2371736dfd75122eaaf277223321117b57e572e235b5b35f558aa14db96`，Nix store 输出 `/nix/store/il48832z3s2734ix3fx1xfjfbrkw71s7-kikiaosp-kernel-7.3-rc4`。Windows 客机已确认声卡播放、设置里的点按音，以及铃声选择器试听。
+
+## 主线：VirtIO GPU fence 修复与性能验证
+
+GPU 加速分支的 `drm-crtc-fence-signaled-ops-race.patch` 已并入主线，并纳入 `kernelPatches` 的可复现构建。它针对 VirtIO GPU / DRM fence 完成回调中的竞态；仍需继续做长时间压力测试，不能把一次启动或帧率测试当作竞态覆盖证明。
+
+端到端验证使用本内核、AOSP 设备树和 KikiEmu 中记录的测试配置。Android 动画基准预热后连续 30 秒的应用帧回调率为 70.36–110.89 FPS，中位数 80.53 FPS，证明当前 VirGL 渲染路径已实际工作且该窗口内高于 60 FPS。此数字是应用帧回调采样，不等于 Windows DWM/面板实际呈现帧率，也不是内核单独的性能指标。桌面、设置和通知栏的交互仍有明显端到端延迟；当前证据不足以将延迟归因于内核，后续应从整条输入—合成—呈现链路继续定位。
