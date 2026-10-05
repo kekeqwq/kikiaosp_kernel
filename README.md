@@ -45,4 +45,6 @@ GPU 加速分支的 `drm-crtc-fence-signaled-ops-race.patch` 已并入主线，�
 
 Nix 构建退出 0，Image 35,613,184 字节，SHA256 `38c6ad1d6cffc76af1f4b6ce66ba42db4d8865b0f60b842fd147bef52b3a5b7c`，bundle `/nix/store/zc9rj6inia8d682j73iqq05cxagm2233-kikiaosp-kernel-7.3-rc6`，实际 module release `7.3.0-rc6-4k`。声明配置与最终 dev `.config` 分开核验，后者见 Nix dev 输出的 `lib/modules/7.3.0-rc6-4k/build/.config`。Windows 实例验证证据由 KikiEmu 的本轮工作记录维护；编译成功不代替实例验证或长时 GPU 竞态覆盖。
 
-没有 main 合并、rc6 标签或公开 Release；0.1/0.2 资产不变。
+KikiAOSP 设备管线冻结 `d6e0fac964bd908a83b3cea21b6f28cb4efc0e65`，实际内部验证包从新的 release-only 源/输出增量构建（不是空输出全量构建），包 SHA256 `3fab8e602ff653cb620a1b9b31358f724ca4444c6b12edfcb94a4e282648e1f3`。Windows 上从该包新建独立 32 GiB 实例，实际 `uname -r=7.3.0-rc6-4k`，无干预截图 HOME 出图，网络网关 ping 成功；60 个连续 AudioTrack clips、冷重启后 12 个 static AudioTrack clips及前后 MediaPlayer/2 秒参考有进程回环输出。HAL 二进制与已验收音频候选完全相同，未继续修改音频。两次受控正常关机，未预注 sync 的数据标记跨冷重启 SHA 相同。
+
+这不是 OTA 就地升级验证或物理扬声器主观音质/长时 GPU 竞态覆盖；正式用户实例未操作。没有 main 合并、rc6 标签或公开 Release；0.1/0.2 资产不变。
