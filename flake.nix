@@ -1,5 +1,5 @@
 {
-  description = "KikiAOSP ARM64 Linux kernel 7.3-rc5";
+  description = "KikiAOSP ARM64 Linux kernel 7.3-rc6";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
@@ -75,7 +75,7 @@
           else toString value;
         in "CONFIG_${name}=${rendered}";
 
-      configfile = pkgs.writeText "kikiaosp-7.3-rc5.config" (
+      configfile = pkgs.writeText "kikiaosp-7.3-rc6.config" (
         builtins.readFile ./gki_defconfig
         + "\n# KikiAOSP declarative overrides\n"
         + lib.concatStringsSep "\n" (lib.mapAttrsToList renderOption kikiConfig)
@@ -83,13 +83,13 @@
       );
 
       kernel = pkgs.linuxManualConfig {
-        version = "7.3.0-rc5-kikiaosp";
-        modDirVersion = "7.3.0-rc5-4k";
+        version = "7.3.0-rc6-kikiaosp";
+        modDirVersion = "7.3.0-rc6-4k";
         src = pkgs.fetchFromGitHub {
           owner = "torvalds";
           repo = "linux";
-          rev = "72d3fcf802c45d00b300f25b848a93c3a2bd7c7e";
-          hash = "sha256-NrTyfot19uJ1SulXU98z2V+leOjjjLmoueX8pnyvn+o=";
+          rev = "a90ee4305c4a5df72c11b31dacfdc76e00fcf78a";
+          hash = "sha256-310GZztrJw+mkRFQ3IQ1pvTafElqHVKU0HMcZDk1x2c=";
         };
         inherit configfile;
         allowImportFromDerivation = true;
@@ -107,7 +107,7 @@
 
       # Preserve the artifact layout consumed by the existing KikiAOSP/QEMU
       # scripts while reusing linuxManualConfig's separate outputs.
-      kernelBundle = pkgs.runCommand "kikiaosp-kernel-7.3-rc5" { } ''
+      kernelBundle = pkgs.runCommand "kikiaosp-kernel-7.3-rc6" { } ''
         mkdir -p $out/boot $out/modules
         cp ${kernel}/Image $out/boot/kernel
         cp ${kernel}/System.map $out/boot/System.map
